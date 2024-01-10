@@ -224,9 +224,17 @@ const BMICalculatorScreen = ({ navigation }) => {
     { label: "ft-in", value: "ft-in" },
   ];
 
-  const onPressSave = () => {
-    console.log("saved");
-    navigation.navigate("BMIDetail");
+  const onPressSave = async () => {
+    console.log("BMI Saved");
+    axios
+      .post("http://192.168.1.11:8000/api/trackers/bmi/", {
+        user: 2,
+        weight_in_kg: weight,
+        height_in_cm: height,
+      })
+      .then((res) => {
+        console.log(res.data, "response from bmi POST");
+      });
   };
 
   return (
@@ -253,21 +261,6 @@ const BMICalculatorScreen = ({ navigation }) => {
         >
           <Text style={{textDecorationLine: "underline", fontSize: 17 }}>
             Statistics
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{  marginRight: 10, display: "flex", alignItems: "flex-end" }}>
-        <TouchableOpacity onPress={saveBmi}>
-          <Text
-            style={{
-              color: colors.primary,
-              fontSize: 18,
-              borderBottomWidth: 1,
-              borderBottomColor: colors.secondary,
-            }}
-          >
-            {" "}
-            Save{" "}
           </Text>
         </TouchableOpacity>
       </View>

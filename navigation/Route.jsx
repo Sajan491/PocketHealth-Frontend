@@ -25,6 +25,7 @@ const Route = () => {
   return (
     <NavigationContainer>
     {!isAuthenticated ? <AuthNavigator /> : <DrawerNavigator />}
+    {/* <DrawerNavigator /> */}
   </NavigationContainer>
   )
 }

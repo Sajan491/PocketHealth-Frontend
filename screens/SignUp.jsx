@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -23,6 +23,10 @@ import axios from "axios";
 import SignUpDatabase from "./SignUpDatabase";
 import Loading from "../components/Loading";
 
+import {REACT_APP_PORT,REACT_APP_BASE_URL} from '@env'
+import { AuthContext } from "../contexts/AuthProvider";
+
+
 const registerValidationSchema = Yup.object().shape({
   email: Yup.string()
     .email("Please enter a valid email!")
@@ -43,11 +47,11 @@ const registerValidationSchema = Yup.object().shape({
 
 const SignUp = ({ navigation, route }) => {
   const { role } = route.params;
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  const PORT = process.env.REACT_APP_PORT;
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const {setToken, setUser} = useContext(AuthContext)
 
   const registerHandler = (values) => {
     console.log(values);
@@ -55,16 +59,20 @@ const SignUp = ({ navigation, route }) => {
     {
       role === "patient" &&
         axios
-          .post("http://192.168.1.80:8000/api/patient_register/", {
+          .post(`${REACT_APP_BASE_URL}:${REACT_APP_PORT}/api/patient_register/`, {
             email: values.email,
             password: values.password,
           })
           .then((res) => {
-            console.log(res, "patient register api response");
+            console.log(res.data, "patient register api response");
+            setToken(res.data.token)
+            setUser(res.data);
             navigation.navigate("SignUpDatabase", {
               role: "patient",
               email: values.email,
             });
+            setLoading(false)
+
           })
           .catch((err) => {
             setLoading(false)
@@ -72,23 +80,27 @@ const SignUp = ({ navigation, route }) => {
               `Error in posting patient register api data: ${err.message}`
             );
             setError(`${err.message} - the user already exists [400]`);
+            setLoading(false);
           });
-      setLoading(false);
-    }
+        }
     {
       role === "practitioner" &&
       setLoading(true);
         axios
-          .post("http://192.168.1.80:8000/api/practitioner_register/", {
+          .post(`${REACT_APP_BASE_URL}:${REACT_APP_PORT}/api/practitioner_register/`, {
             email: values.email,
             password: values.password,
           })
           .then((res) => {
             console.log(res.data, "Practitioner register api response");
+            setToken(res.data.token)
+            setUser(res.data);
             navigation.navigate("SignUpDatabase", {
               role: "practitioner",
               email: values.email,
             });
+            setLoading(false)
+
           })
           .catch((err) => {
             setLoading(false)
@@ -97,7 +109,6 @@ const SignUp = ({ navigation, route }) => {
             );
             setError(err.message);
           });
-      setLoading(false);
     }
   };
 
